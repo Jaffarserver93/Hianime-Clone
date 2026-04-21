@@ -1,12 +1,11 @@
 <?php
 session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/_config.php');
-require_once($_SERVER['DOCUMENT_ROOT'] . '/src/lib/jikan_adapter.php');
 
 $data = array_merge([
     'trending' => [],
     'spotlights' => []
-], jikan_home_payload());
+], []);
 ?>
 <!DOCTYPE html>
 <html prefix="og: http://ogp.me/ns#" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -65,6 +64,45 @@ $data = array_merge([
     <link rel=stylesheet href=https://use.fontawesome.com/releases/v5.3.1/css/all.css>
     <link rel=stylesheet href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=67521dcc10699f0019237fbb&product=inline-share-buttons&source=platform" async="async"></script>
+    <style>
+        .skeleton {
+            background: linear-gradient(90deg, #2f2f37 25%, #3c3c46 37%, #2f2f37 63%);
+            background-size: 400% 100%;
+            animation: skeleton-shimmer 1.4s ease infinite;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .skeleton-text {
+            min-height: 14px;
+            width: 100%;
+            border-radius: 6px;
+        }
+        .skeleton-card {
+            width: 100%;
+            min-height: 120px;
+            display: block;
+        }
+        .skeleton-number {
+            width: 28px;
+            min-height: 24px;
+        }
+        .skeleton-time {
+            width: 70px;
+            min-height: 18px;
+        }
+        .skeleton-episode {
+            width: 110px;
+            min-height: 28px;
+        }
+        .skeleton-error {
+            padding: 10px 0;
+            color: #ddd;
+        }
+        @keyframes skeleton-shimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: 0 0; }
+        }
+    </style>
 
 </head>
 <body data-page="page_home">
@@ -196,6 +234,7 @@ $data = array_merge([
         <script type="text/javascript" src="<?= $websiteUrl ?>/src/assets/js/app.js"></script>
         <script type="text/javascript" src="<?= $websiteUrl ?>/src/assets/js/comman.js"></script>
         <script type="text/javascript" src="<?= $websiteUrl ?>/src/assets/js/movie.js"></script>
+        <script type="text/javascript" src="<?= $websiteUrl ?>/src/assets/js/home-skeleton.js"></script>
         <link rel="stylesheet" href="<?= $websiteUrl ?>/src/assets/css/jquery-ui.css">
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script type="text/javascript" src="<?= $websiteUrl ?>/src/assets/js/function.js"></script>

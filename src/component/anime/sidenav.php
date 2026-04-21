@@ -1,16 +1,3 @@
-<?php
-
-$data = null;
-require_once($_SERVER['DOCUMENT_ROOT'] . '/src/lib/jikan_adapter.php');
-$data = jikan_top_ten_legacy();
-
-if ($data['success']) {
-    $todayResults = $data['results']['today'];
-    $weekResults = $data['results']['week'];
-    $monthResults = $data['results']['month'];
-}
-?>
-
 <div id="main-sidebar">
     <section class="block_area block_area_sidebar block_area-genres">
         <div class="block_area-header">
@@ -91,123 +78,45 @@ if ($data['success']) {
             <div class="cbox-content">
                 <div class="tab-content">
                     <div id="top-viewed-day" class="anif-block-ul anif-block-chart tab-pane active">
-                        <ul class="ulclear">
-                            <?php foreach ($data['results']['today'] as $anime): ?>
-                            <li class="<?php echo $anime['number'] <= 3 ? 'item-top' : ''; ?>">
-                                <div class="film-number"><span><?php echo $anime['number']; ?></span></div>
-                                <div class="film-poster item-qtip" data-id="<?php echo $anime['id']; ?>">
-                                    <img src="<?= $websiteUrl ?>/public/images/no_poster.jpg" data-src="<?php echo $anime['poster']; ?>" class="film-poster-img lazyload" alt="<?php echo $anime['jname']; ?>">
-                                </div>
+                        <ul class="ulclear" id="top10-today-list">
+                            <?php for ($i = 1; $i <= 10; $i++): ?>
+                            <li class="<?= $i <= 3 ? 'item-top' : '' ?>">
+                                <div class="film-number"><span class="skeleton skeleton-text skeleton-number"></span></div>
+                                <div class="film-poster skeleton skeleton-card"></div>
                                 <div class="film-detail">
-                                     <h3 class="film-name">
-                                        <a href="/details/<?php echo $anime['id']; ?>" title="<?php echo $anime['jname']; ?>" 
-                                           class="dynamic-name" data-title="<?php echo htmlspecialchars($anime['title']); ?>" data-jname="<?php echo htmlspecialchars($anime['jname']); ?>">
-                                            <?php echo htmlspecialchars($anime['title']); ?>
-                                        </a>
-                                    </h3>
-                                    <div class="fd-infor">
-                                        <div class="tick">
-                                            <?php if (isset($anime['tvInfo']['sub'])): ?>
-                                            <div class="tick-item tick-sub">
-                                                <i class="fas fa-closed-captioning mr-1"></i><?php echo $anime['tvInfo']['sub']; ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if (isset($anime['tvInfo']['dub'])): ?>
-                                            <div class="tick-item tick-dub">
-                                                <i class="fas fa-microphone mr-1"></i><?php echo $anime['tvInfo']['dub']; ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if (isset($anime['tvInfo']['eps'])): ?>
-                                            <div class="tick-item tick-eps"><?php echo $anime['tvInfo']['eps']; ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
+                                    <h3 class="film-name"><span class="skeleton skeleton-text"></span></h3>
                                 </div>
                                 <div class="clearfix"></div>
                             </li>
-                            <?php endforeach; ?>
+                            <?php endfor; ?>
                         </ul>
                     </div>
                     <div id="top-viewed-week" class="anif-block-ul anif-block-chart tab-pane">
-                        <ul class="ulclear">
-                            <?php foreach ($data['results']['week'] as $anime): ?>
-                            <li class="<?php echo $anime['number'] <= 3 ? 'item-top' : ''; ?>">
-                                <div class="film-number"><span><?php echo $anime['number']; ?></span></div>
-                                <div class="film-poster item-qtip" data-id="<?php echo $anime['id']; ?>">
-                                    <img src="<?= $websiteUrl ?>/public/images/no_poster.jpg" data-src="<?php echo $anime['poster']; ?>" class="film-poster-img lazyload" alt="<?php echo $anime['jname']; ?>">
-                                </div>
+                        <ul class="ulclear" id="top10-week-list">
+                            <?php for ($i = 1; $i <= 10; $i++): ?>
+                            <li class="<?= $i <= 3 ? 'item-top' : '' ?>">
+                                <div class="film-number"><span class="skeleton skeleton-text skeleton-number"></span></div>
+                                <div class="film-poster skeleton skeleton-card"></div>
                                 <div class="film-detail">
-                                     <h3 class="film-name">
-                                        <a href="/details/<?php echo $anime['id']; ?>" title="<?php echo $anime['jname']; ?>" 
-                                           class="dynamic-name" data-title="<?php echo htmlspecialchars($anime['title']); ?>" data-jname="<?php echo htmlspecialchars($anime['jname']); ?>">
-                                            <?php echo htmlspecialchars($anime['title']); ?>
-                                        </a>
-                                    </h3>
-                                    <div class="fd-infor">
-                                        <div class="tick">
-                                            <?php if (isset($anime['tvInfo']['sub'])): ?>
-                                            <div class="tick-item tick-sub">
-                                                <i class="fas fa-closed-captioning mr-1"></i><?php echo $anime['tvInfo']['sub']; ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if (isset($anime['tvInfo']['dub'])): ?>
-                                            <div class="tick-item tick-dub">
-                                                <i class="fas fa-microphone mr-1"></i><?php echo $anime['tvInfo']['dub']; ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if (isset($anime['tvInfo']['eps'])): ?>
-                                            <div class="tick-item tick-eps"><?php echo $anime['tvInfo']['eps']; ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
+                                    <h3 class="film-name"><span class="skeleton skeleton-text"></span></h3>
                                 </div>
                                 <div class="clearfix"></div>
                             </li>
-                            <?php endforeach; ?>
+                            <?php endfor; ?>
                         </ul>
                     </div>
                     <div id="top-viewed-month" class="anif-block-ul anif-block-chart tab-pane">
-                        <ul class="ulclear">
-                            <?php foreach ($data['results']['month'] as $anime): ?>
-                            <li class="<?php echo $anime['number'] <= 3 ? 'item-top' : ''; ?>">
-                                <div class="film-number"><span><?php echo $anime['number']; ?></span></div>
-                                <div class="film-poster item-qtip" data-id="<?php echo $anime['id']; ?>">
-                                    <img src="<?= $websiteUrl ?>/public/images/no_poster.jpg" data-src="<?php echo $anime['poster']; ?>" class="film-poster-img lazyload" alt="<?php echo $anime['jname']; ?>">
-                                </div>
+                        <ul class="ulclear" id="top10-month-list">
+                            <?php for ($i = 1; $i <= 10; $i++): ?>
+                            <li class="<?= $i <= 3 ? 'item-top' : '' ?>">
+                                <div class="film-number"><span class="skeleton skeleton-text skeleton-number"></span></div>
+                                <div class="film-poster skeleton skeleton-card"></div>
                                 <div class="film-detail">
-                                     <h3 class="film-name">
-                                        <a href="/details/<?php echo $anime['id']; ?>" title="<?php echo $anime['jname']; ?>" 
-                                           class="dynamic-name" data-title="<?php echo htmlspecialchars($anime['title']); ?>" data-jname="<?php echo htmlspecialchars($anime['jname']); ?>">
-                                            <?php echo htmlspecialchars($anime['title']); ?>
-                                        </a>
-                                    </h3>
-                                    <div class="fd-infor">
-                                        <div class="tick">
-                                            <?php if (isset($anime['tvInfo']['sub'])): ?>
-                                            <div class="tick-item tick-sub">
-                                                <i class="fas fa-closed-captioning mr-1"></i><?php echo $anime['tvInfo']['sub']; ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if (isset($anime['tvInfo']['dub'])): ?>
-                                            <div class="tick-item tick-dub">
-                                                <i class="fas fa-microphone mr-1"></i><?php echo $anime['tvInfo']['dub']; ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if (isset($anime['tvInfo']['eps'])): ?>
-                                            <div class="tick-item tick-eps"><?php echo $anime['tvInfo']['eps']; ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
+                                    <h3 class="film-name"><span class="skeleton skeleton-text"></span></h3>
                                 </div>
                                 <div class="clearfix"></div>
                             </li>
-                            <?php endforeach; ?>
+                            <?php endfor; ?>
                         </ul>
                     </div>
                     <div class="clearfix"></div>
