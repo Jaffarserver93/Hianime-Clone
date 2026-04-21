@@ -213,8 +213,8 @@ if (!function_exists('fetchAnimeDataFromJikan')) {
         $actors = normalizeJikanCharacterPayload($characters)['results']['data'];
         $displayTitle = !empty($anime['title_english']) ? $anime['title_english'] : ($anime['title'] ?? '');
         $displayPoster = $anime['images']['jpg']['large_image_url'] ?? ($anime['images']['jpg']['image_url'] ?? '');
-        $subEp = $anime['episodes'] ?? 'N/A';
-        $dubEp = $anime['episodes'] ?? 'N/A';
+        $subEp = $anime['episodes'] ?? null;
+        $dubEp = null;
 
         return [
             'banner' => null,
@@ -230,8 +230,8 @@ if (!function_exists('fetchAnimeDataFromJikan')) {
             'showType' => $anime['type'] ?? 'TV',
             'rating' => $anime['rating'] ?? 'N/A',
             'quality' => 'HD',
-            'subEp' => (string) $subEp,
-            'dubEp' => (string) $dubEp,
+            'subEp' => $subEp !== null ? (string) $subEp : 'N/A',
+            'dubEp' => $dubEp !== null ? (string) $dubEp : '',
             'aired' => $anime['aired']['string'] ?? 'Unknown',
             'premiered' => !empty($anime['season']) && !empty($anime['year'])
                 ? ucfirst($anime['season']) . ' ' . $anime['year']
@@ -266,7 +266,8 @@ $displayPoster = !empty($animeData['banner'])
         ? $animeData['poster']
         : ($animeData['image'] ?? ''));
 $subCount = isset($animeData['subEp']) && $animeData['subEp'] !== '' ? $animeData['subEp'] : 'N/A';
-$dubCount = isset($animeData['dubEp']) && $animeData['dubEp'] !== '' ? $animeData['dubEp'] : 'N/A';
+$showDubBadge = isset($animeData['dubEp']) && $animeData['dubEp'] !== '' && strtoupper((string) $animeData['dubEp']) !== 'N/A';
+$dubCount = $showDubBadge ? $animeData['dubEp'] : 'N/A';
 
 $characterData = [
     'success' => true,
@@ -371,6 +372,24 @@ $watchlistLabels = [
     <link rel=stylesheet href=https://use.fontawesome.com/releases/v5.3.1/css/all.css>
     <link rel=stylesheet href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=67521dcc10699f0019237fbb&product=inline-share-buttons&source=platform" async="async"></script>
+    <style>
+        .film-stats .tick.tick-badges {
+            gap: 0 !important;
+        }
+        .film-stats .tick.tick-badges .tick-item {
+            margin: 0 !important;
+            border-radius: 0;
+        }
+        .film-stats .tick.tick-badges .tick-item:first-child {
+            border-radius: 999px 0 0 999px;
+        }
+        .film-stats .tick.tick-badges .tick-item:last-child {
+            border-radius: 0 999px 999px 0;
+        }
+        .characters-hidden {
+            display: none;
+        }
+    </style>
 </head>
 
 <body data-page="movie_info">
@@ -405,10 +424,12 @@ $watchlistLabels = [
                                 <h2 class="film-name dynamic-name" data-jname="<?= htmlspecialchars($japaneseTitle) ?>"><?= htmlspecialchars($displayTitle) ?></h2>
                                 <div id="mal-sync"></div>
                                 <div class="film-stats">
-                                    <div class="tick" style="display:flex;justify-content:center;align-items:center;text-align:center;gap:8px;flex-wrap:wrap;">
-                                    <div class="tick-item tick-quality"><?= htmlspecialchars($animeData['quality']) ?></div>
+                                    <div class="tick tick-badges" style="display:flex;justify-content:center;align-items:center;text-align:center;flex-wrap:wrap;">
+                                        <div class="tick-item tick-quality"><?= htmlspecialchars($animeData['quality']) ?></div>
                                         <div class="tick-item tick-sub"><i class="fas fa-closed-captioning mr-1"></i><?= htmlspecialchars($subCount) ?></div>
-                                        <div class="tick-item tick-dub"><i class="fas fa-microphone mr-1"></i><?= htmlspecialchars($dubCount) ?></div>
+                                        <?php if ($showDubBadge): ?>
+                                            <div class="tick-item tick-dub"><i class="fas fa-microphone mr-1"></i><?= htmlspecialchars($dubCount) ?></div>
+                                        <?php endif; ?>
                                         <span class="dot"></span>
                                         <span class="item"><?= htmlspecialchars($animeData['showType']) ?></span>
                                         <span class="dot"></span>
@@ -606,7 +627,11 @@ $watchlistLabels = [
                     </div>
                     <div class="block-actors-content">
                         <div class="bac-list-wrap">
-                            <?php foreach ($animeData['actors'] as $entry): ?>
+                            <?php
+                                $visibleActors = array_slice($animeData['actors'], 0, 10);
+                                $hiddenActors = array_slice($animeData['actors'], 10);
+                            ?>
+                            <?php foreach ($visibleActors as $entry): ?>
                                 <div class="bac-item">
                                     <div class="per-info ltr">
                                         <a href="/character/<?= htmlspecialchars($entry['character']['id']) ?>" class="pi-avatar" rel="noopener noreferrer">
@@ -641,6 +666,48 @@ $watchlistLabels = [
                                     <div class="clearfix"></div>
                                 </div>
                             <?php endforeach; ?>
+                            <?php if (!empty($hiddenActors)): ?>
+                                <div id="characters-hidden-list" class="characters-hidden">
+                                    <?php foreach ($hiddenActors as $entry): ?>
+                                        <div class="bac-item">
+                                            <div class="per-info ltr">
+                                                <a href="/character/<?= htmlspecialchars($entry['character']['id']) ?>" class="pi-avatar" rel="noopener noreferrer">
+                                                    <img data-src="<?= htmlspecialchars($entry['character']['poster']) ?>" alt="<?= htmlspecialchars($entry['character']['name']) ?>" class="lazyloaded" src="<?= htmlspecialchars($entry['character']['poster']) ?>">
+                                                </a>
+                                                <div class="pi-detail">
+                                                    <h4 class="pi-name">
+                                                        <a href="/character/<?= htmlspecialchars($entry['character']['id']) ?>" rel="noopener noreferrer">
+                                                            <?= htmlspecialchars($entry['character']['name']) ?>
+                                                        </a>
+                                                    </h4>
+                                                    <span class="pi-cast"><?= htmlspecialchars($entry['character']['cast']) ?></span>
+                                                </div>
+                                            </div>
+
+                                            <?php if (!empty($entry['voiceActors']) && is_array($entry['voiceActors'])): ?>
+                                                <?php $voiceActor = $entry['voiceActors'][0]; ?>
+                                                <div class="per-info rtl">
+                                                    <a href="/actors/<?= htmlspecialchars($voiceActor['id']) ?>" class="pi-avatar" rel="noopener noreferrer">
+                                                        <img data-src="<?= htmlspecialchars($voiceActor['poster']) ?>" class="lazyloaded" alt="<?= htmlspecialchars($voiceActor['name']) ?>" src="<?= htmlspecialchars($voiceActor['poster']) ?>">
+                                                    </a>
+                                                    <div class="pi-detail">
+                                                        <h4 class="pi-name">
+                                                            <a href="/actors/<?= htmlspecialchars($voiceActor['id']) ?>" rel="noopener noreferrer">
+                                                                <?= htmlspecialchars($voiceActor['name']) ?>
+                                                            </a>
+                                                        </h4>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <div class="clearfix"></div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <button type="button" class="btn btn-sm btn-secondary" id="toggle-characters-btn">View More</button>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div class="clearfix"></div>
                     </div>
@@ -711,7 +778,7 @@ $watchlistLabels = [
                         <div class="block_area-content block_area-list film_list film_list-grid film_list-wfeature">
                             <div class="film_list-wrap">
                                 <?php if (!empty($animeData['recommendedAnimes'])): ?>
-                                    <?php foreach ($animeData['recommendedAnimes'] as $recommendedAnime): ?>
+                                    <?php foreach (array_slice($animeData['recommendedAnimes'], 0, 10) as $recommendedAnime): ?>
                                         <div class="flw-item">
                                             <div class="film-poster">
                                                 <div class="tick ltr">
@@ -882,6 +949,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    const toggleCharactersBtn = document.getElementById('toggle-characters-btn');
+    const hiddenCharacters = document.getElementById('characters-hidden-list');
+    if (toggleCharactersBtn && hiddenCharacters) {
+        toggleCharactersBtn.addEventListener('click', function () {
+            const isHidden = hiddenCharacters.style.display === '' || hiddenCharacters.style.display === 'none';
+            hiddenCharacters.style.display = isHidden ? 'block' : 'none';
+            toggleCharactersBtn.textContent = isHidden ? 'View Less' : 'View More';
+        });
+    }
 });
 </script>
 
