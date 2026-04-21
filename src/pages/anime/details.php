@@ -8,7 +8,7 @@ ini_set('display_errors', 1);
 $mysqli = $conn;
 
 $urlPath = $_SERVER['REQUEST_URI'];
-$animeId = basename($urlPath);
+$animeId = $_GET['slug'] ?? basename(parse_url($urlPath, PHP_URL_PATH));
 
 if (!function_exists('detailsHttpGetJson')) {
     function detailsHttpGetJson(string $url, int $timeout = 15): array
@@ -97,26 +97,45 @@ if (!function_exists('normalizeJikanCharacterPayload')) {
 if (!function_exists('fetchAnimeDataFromJikan')) {
     function fetchAnimeDataFromJikan(string $animeId): array
     {
-        $query = slugToJikanQuery($animeId);
-        if ($query === '') {
-            return [];
+        $anime = [];
+        $malId = 0;
+
+        if (is_numeric($animeId)) {
+            $malId = (int) $animeId;
+            if ($malId <= 0) {
+                return [];
+            }
+            $full = detailsHttpGetJson('https://api.jikan.moe/v4/anime/' . $malId . '/full');
+            if ($full['status'] !== 200 || empty($full['json']['data'])) {
+                return [];
+            }
+            $anime = $full['json']['data'];
+        } else {
+            $query = slugToJikanQuery($animeId);
+            if ($query === '') {
+                return [];
+            }
+
+            $searchUrl = 'https://api.jikan.moe/v4/anime?q=' . rawurlencode($query) . '&order_by=popularity&sort=desc&limit=1';
+            $search = detailsHttpGetJson($searchUrl);
+            if ($search['status'] !== 200 || empty($search['json']['data'][0])) {
+                return [];
+            }
+
+            $anime = $search['json']['data'][0];
+            $malId = (int) ($anime['mal_id'] ?? 0);
+            if ($malId <= 0) {
+                return [];
+            }
+
+            $full = detailsHttpGetJson('https://api.jikan.moe/v4/anime/' . $malId . '/full');
+            if ($full['status'] === 200 && !empty($full['json']['data'])) {
+                $anime = $full['json']['data'];
+            }
         }
 
-        $searchUrl = 'https://api.jikan.moe/v4/anime?q=' . rawurlencode($query) . '&order_by=popularity&sort=asc&limit=1';
-        $search = detailsHttpGetJson($searchUrl);
-        if ($search['status'] !== 200 || empty($search['json']['data'][0])) {
-            return [];
-        }
-
-        $anime = $search['json']['data'][0];
-        $malId = (int) ($anime['mal_id'] ?? 0);
         if ($malId <= 0) {
             return [];
-        }
-
-        $full = detailsHttpGetJson('https://api.jikan.moe/v4/anime/' . $malId . '/full');
-        if ($full['status'] === 200 && !empty($full['json']['data'])) {
-            $anime = $full['json']['data'];
         }
 
         $relationsResponse = detailsHttpGetJson('https://api.jikan.moe/v4/anime/' . $malId . '/relations');
