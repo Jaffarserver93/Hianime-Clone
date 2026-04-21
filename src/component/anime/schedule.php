@@ -27,7 +27,19 @@
             </div>
             <div class="clearfix"></div>
             <ul class="ulclear table_schedule-list limit-8" id="schedule-items">
-                <!-- Schedule items will be populated dynamically -->
+                <?php for ($i = 0; $i < 8; $i++): ?>
+                    <li>
+                        <div class="tsl-link">
+                            <div class="time skeleton skeleton-text skeleton-time"></div>
+                            <div class="film-detail">
+                                <h3 class="film-name"><span class="skeleton skeleton-text"></span></h3>
+                                <div class="fd-play">
+                                    <span class="skeleton skeleton-text skeleton-episode"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                <?php endfor; ?>
             </ul>
             <button id="scl-more" class="btn btn-sm btn-block btn-showmore" style="display: none;"></button>
         </div>
@@ -127,6 +139,9 @@ async function fetchSchedule(date) {
         }
     } catch (error) {
         console.error('Error fetching schedule:', error);
+        const container = document.getElementById('schedule-items');
+        container.innerHTML = '<li class="text-center py-3">Failed to load anime data.</li>';
+        document.getElementById('scl-more').style.display = 'none';
     }
 }
 
